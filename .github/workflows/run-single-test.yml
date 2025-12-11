@@ -1,0 +1,38 @@
+name: Run Single Selenium Test (MultiSitemapTestCase)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  run-single-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Install ChromeDriver
+        uses: nanasess/setup-chromedriver@v2
+
+      - name: Run MultiSitemapTestCase
+        run: mvn -Dtest=MultiSitemapTestCase test
+
+      - name: Upload Test Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: selenium-test-report
+          path: |
+            test-output/
+            screenshots/
+            logs/
