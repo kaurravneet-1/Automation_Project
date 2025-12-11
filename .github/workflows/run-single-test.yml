@@ -32,7 +32,9 @@ jobs:
       - name: Run tests (Maven)
         # adjust mvn command to your needs
         run: |
-          mvn -Dtest=MultiSitemapTestCase test -B
+         - name: Run TestNG Suite
+            run: mvn clean test -DsuiteXmlFile=testng.xml
+
 
       # --- COPY COMMON REPORT LOCATIONS into single folder `test-output` ---
       - name: Prepare test-output
