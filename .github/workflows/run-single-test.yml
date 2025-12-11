@@ -30,10 +30,9 @@ jobs:
           # optional: check chromedriver if required
 
       - name: Run tests (Maven)
-        # adjust mvn command to your needs
-        run: |
-         - name: Run TestNG Suite
-            run: mvn clean test -DsuiteXmlFile=testng.xml
+        run: mvn clean test -DsuiteXmlFile=testng.xml
+
+
 
 
       # --- COPY COMMON REPORT LOCATIONS into single folder `test-output` ---
