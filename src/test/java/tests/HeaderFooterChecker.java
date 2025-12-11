@@ -54,7 +54,7 @@ public class HeaderFooterChecker extends BaseTest {
 
                     ExtentTest pageTest = test.createNode("Page: " + url);
 
-                    // SUMMARY counting is handled here manually
+                   
                     totalPassed += checkCompanyNameAndLogo(client, pageTest, url);
                     totalPassed += checkPhoneNumbers(client, pageTest, url);
                     totalPassed += checkAddresses(client, pageTest, url);
@@ -65,7 +65,7 @@ public class HeaderFooterChecker extends BaseTest {
                     // Example for FAIL: return -1
                 }
 
-                // SUMMARY SECTION
+              
                 ExtentTest summary = test.createNode("SUMMARY");
                 summary.info("Total Pages Scanned: " + totalPages);
                 summary.info("Total Passed Checks: " + totalPassed);
@@ -73,11 +73,11 @@ public class HeaderFooterChecker extends BaseTest {
                 summary.info("Total Warnings: " + totalWarnings);
 
                 if (totalFailed > 0) {
-                    summary.fail("❌ Website has failed checks.");
+                    summary.fail(" Website has failed checks.");
                 } else if (totalWarnings > 0) {
-                    summary.warning("⚠ Website has warnings.");
+                    summary.warning(" Website has warnings.");
                 } else {
-                    summary.pass("✔ All checks passed successfully!");
+                    summary.pass(" All checks passed successfully!");
                 }
 
                 driver.quit();
@@ -89,7 +89,7 @@ public class HeaderFooterChecker extends BaseTest {
         }
     }
 
-    // ---------------- NORMALIZATION ----------------
+   
 
     private String normalize(String text) {
         if (text == null) return "";
@@ -121,7 +121,7 @@ public class HeaderFooterChecker extends BaseTest {
         );
     }
 
-    // ---------------- FUZZY MATCH ----------------
+   
 
     private boolean fuzzyMatch(String a, String b) {
         a = normalize(a);
@@ -153,7 +153,7 @@ public class HeaderFooterChecker extends BaseTest {
         return dp[a.length()][b.length()];
     }
 
-    // ---------------- COMPANY NAME + LOGO ----------------
+  
 
     public int checkCompanyNameAndLogo(ExcelReader.ClientData client, ExtentTest pageTest, String url) {
 
@@ -190,7 +190,7 @@ public class HeaderFooterChecker extends BaseTest {
         }
     }
 
-    // ---------------- PHONE CHECK ----------------
+
 
     private int checkPhoneNumbers(ExcelReader.ClientData client, ExtentTest pageTest, String url) {
 
@@ -213,7 +213,7 @@ public class HeaderFooterChecker extends BaseTest {
         return 0;
     }
 
-    // ---------------- ADDRESS CHECK ----------------
+   
 
     private int checkAddresses(ExcelReader.ClientData client, ExtentTest pageTest, String url) {
 
@@ -239,7 +239,6 @@ public class HeaderFooterChecker extends BaseTest {
         return 0;
     }
 
-    // ---------------- HOURS CHECK ----------------
 
     private int checkHours(ExcelReader.ClientData client, ExtentTest pageTest, String url) {
 
@@ -262,7 +261,7 @@ public class HeaderFooterChecker extends BaseTest {
         return 0;
     }
 
-    // ---------------- LINKS ----------------
+ 
 
     private Set<String> collectInternalLinks(String baseUrl) {
         Set<String> links = new HashSet<>();
@@ -288,7 +287,7 @@ public class HeaderFooterChecker extends BaseTest {
         }
     }
 
-    // ---------------- SCREENSHOT ----------------
+
 
     private String captureScreenshot(String url) {
         try {
@@ -310,3 +309,4 @@ public class HeaderFooterChecker extends BaseTest {
 
    
 }
+
