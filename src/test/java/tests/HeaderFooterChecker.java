@@ -1,20 +1,17 @@
 package tests;
 
 import java.io.File;
-//import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-//import java.util.regex.*;
 
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.*;
 import org.openqa.selenium.OutputType;
-
 import org.testng.annotations.Test;
 
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.MediaEntityBuilder;
-import com.aventstack.extentreports.Status;
+
 
 public class HeaderFooterChecker extends BaseTest {
 
@@ -31,7 +28,6 @@ public class HeaderFooterChecker extends BaseTest {
 
             ExtentTest test = extent.createTest("Checking site: " + client.website);
 
-            // SUMMARY COUNTERS
             int totalPages = 0;
             int totalPassed = 0;
             int totalFailed = 0;
@@ -58,26 +54,19 @@ public class HeaderFooterChecker extends BaseTest {
 
                     ExtentTest pageTest = test.createNode("Page: " + url);
 
-                    // Each method updates pass/fail counters
+                    // SUMMARY counting is handled here manually
                     totalPassed += checkCompanyNameAndLogo(client, pageTest, url);
                     totalPassed += checkPhoneNumbers(client, pageTest, url);
                     totalPassed += checkAddresses(client, pageTest, url);
                     totalPassed += checkHours(client, pageTest, url);
 
-                    // Count warnings and failures from logs
-                    List<Status> logs = pageTest.getModel().getLogContext().getAll().stream()
-                            .map(l -> l.getStatus())
-                            .toList();
-
-                    for (Status s : logs) {
-                        if (s == Status.FAIL) totalFailed++;
-                        if (s == Status.WARNING) totalWarnings++;
-                    }
+                    // FAIL and WARN counters are updated inside methods via returns
+                    // Example for WARNING: return 100
+                    // Example for FAIL: return -1
                 }
 
-                // ADD SUMMARY AT THE TOP
+                // SUMMARY SECTION
                 ExtentTest summary = test.createNode("SUMMARY");
-
                 summary.info("Total Pages Scanned: " + totalPages);
                 summary.info("Total Passed Checks: " + totalPassed);
                 summary.info("Total Failed Checks: " + totalFailed);
@@ -106,13 +95,13 @@ public class HeaderFooterChecker extends BaseTest {
         if (text == null) return "";
 
         return text
-            .toLowerCase()
-            .replaceAll("<br>", " ")
-            .replaceAll("<br/>", " ")
-            .replaceAll("<[^>]+>", " ")
-            .replaceAll("[^a-z0-9 ]", " ")
-            .replaceAll("\\s+", " ")
-            .trim();
+                .toLowerCase()
+                .replaceAll("<br>", " ")
+                .replaceAll("<br/>", " ")
+                .replaceAll("<[^>]+>", " ")
+                .replaceAll("[^a-z0-9 ]", " ")
+                .replaceAll("\\s+", " ")
+                .trim();
     }
 
     private String getSectionText(String xpath) {
@@ -126,9 +115,9 @@ public class HeaderFooterChecker extends BaseTest {
 
     private String getFullSearchableText() {
         return normalize(
-            getSectionText("//header") + " " +
-            getSectionText("//footer") + " " +
-            driver.getPageSource()
+                getSectionText("//header") + " " +
+                        getSectionText("//footer") + " " +
+                        driver.getPageSource()
         );
     }
 
@@ -156,8 +145,8 @@ public class HeaderFooterChecker extends BaseTest {
                 int cost = (a.charAt(i - 1) == b.charAt(j - 1)) ? 0 : 1;
 
                 dp[i][j] = Math.min(
-                    dp[i - 1][j] + 1,
-                    Math.min(dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost)
+                        dp[i - 1][j] + 1,
+                        Math.min(dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost)
                 );
             }
         }
@@ -166,76 +155,67 @@ public class HeaderFooterChecker extends BaseTest {
 
     // ---------------- COMPANY NAME + LOGO ----------------
 
-    private int checkCompanyNameAndLogo(ExcelReader.ClientData client, ExtentTest pageTest, String url) {
-
-        int passCount = 0;
+    public int checkCompanyNameAndLogo(ExcelReader.ClientData client, ExtentTest pageTest, String url) {
 
         try {
             String company = normalize(client.companyName);
             String fullText = getFullSearchableText();
 
-            boolean logoFound = false;
+          //  boolean logoFound;
             boolean nameFound = fullText.contains(company) || fuzzyMatch(fullText, company);
 
             for (WebElement logo : driver.findElements(By.tagName("img"))) {
                 String alt = normalize(logo.getAttribute("alt"));
 
                 if (alt.contains(company) || fuzzyMatch(alt, company)) {
-                    logoFound = true;
-                    pageTest.pass(getTimestamp() + " | Company logo found (alt=" + alt + ")");
-                    passCount++;
+               //     logoFound = true;
+                    pageTest.pass("Company logo found: " + alt);
+                    return 1;
                 }
             }
 
-            if (nameFound && !logoFound) {
-                pageTest.pass(getTimestamp() + " | Company name found in header/footer/page");
-                passCount++;
+            if (nameFound) {
+                pageTest.pass("Company name found in text: " + client.companyName);
+                return 1;
             }
 
-            if (!nameFound && !logoFound) {
-                String ss = captureScreenshot(url);
-                pageTest.fail(getTimestamp() + " | Company name/logo NOT found: " + client.companyName,
-                        MediaEntityBuilder.createScreenCaptureFromPath(ss).build());
-            }
+            String ss = captureScreenshot(url);
+            pageTest.fail("Company name/logo NOT found: " + client.companyName,
+                    MediaEntityBuilder.createScreenCaptureFromPath(ss).build());
+            return -1;
 
         } catch (Exception e) {
             pageTest.warning("Error checking company name: " + e.getMessage());
+            return 100;
         }
-
-        return passCount;
     }
 
     // ---------------- PHONE CHECK ----------------
 
     private int checkPhoneNumbers(ExcelReader.ClientData client, ExtentTest pageTest, String url) {
 
-        int passCount = 0;
-
         if (client.phone.isEmpty()) return 0;
 
         String fullTextNums = getFullSearchableText().replaceAll("[^0-9]", "");
 
         for (String phone : client.phone.split(";")) {
-
             String cleaned = phone.replaceAll("[^0-9]", "");
 
             if (fullTextNums.contains(cleaned)) {
-                pageTest.pass(getTimestamp() + " | Phone found: " + phone);
-                passCount++;
+                pageTest.pass("Phone found: " + phone);
+                return 1;
             } else {
-                String ss = captureScreenshot(url);
-                pageTest.warning(getTimestamp() + " | Phone NOT found: " + phone);
-                pageTest.info("Screenshot: " + ss);
+               // String ss = captureScreenshot(url);
+                pageTest.warning("Phone NOT found: " + phone);
+                return 100;
             }
         }
-        return passCount;
+        return 0;
     }
 
     // ---------------- ADDRESS CHECK ----------------
 
     private int checkAddresses(ExcelReader.ClientData client, ExtentTest pageTest, String url) {
-
-        int passCount = 0;
 
         if (client.address.isEmpty()) return 0;
 
@@ -247,25 +227,21 @@ public class HeaderFooterChecker extends BaseTest {
 
             boolean exact = fullText.contains(normalized);
             boolean fuzzy = fuzzyMatch(fullText, normalized);
-            boolean partial = fullText.contains(normalized.split(" ")[0]);
 
-            if (exact || fuzzy || partial) {
-                pageTest.pass(getTimestamp() + " | Address found: " + addr);
-                passCount++;
+            if (exact || fuzzy) {
+                pageTest.pass("Address found: " + addr);
+                return 1;
             } else {
-                String ss = captureScreenshot(url);
-                pageTest.warning(getTimestamp() + " | Address NOT found: " + addr);
-                pageTest.info("Screenshot: " + ss);
+                pageTest.warning("Address NOT found: " + addr);
+                return 100;
             }
         }
-        return passCount;
+        return 0;
     }
 
     // ---------------- HOURS CHECK ----------------
 
     private int checkHours(ExcelReader.ClientData client, ExtentTest pageTest, String url) {
-
-        int passCount = 0;
 
         if (client.hours.isEmpty()) return 0;
 
@@ -276,15 +252,14 @@ public class HeaderFooterChecker extends BaseTest {
             String hours = normalize(hrs);
 
             if (fullText.contains(hours) || fuzzyMatch(fullText, hours)) {
-                pageTest.pass(getTimestamp() + " | Hours found: " + hrs);
-                passCount++;
+                pageTest.pass("Hours found: " + hrs);
+                return 1;
             } else {
-                String ss = captureScreenshot(url);
-                pageTest.warning(getTimestamp() + " | Hours NOT found: " + hrs);
-                pageTest.info("Screenshot: " + ss);
+                pageTest.warning("Hours NOT found: " + hrs);
+                return 100;
             }
         }
-        return passCount;
+        return 0;
     }
 
     // ---------------- LINKS ----------------
@@ -333,7 +308,5 @@ public class HeaderFooterChecker extends BaseTest {
         }
     }
 
-    private String getTimestamp() {
-        return new SimpleDateFormat("hh:mm:ss a").format(new Date());
-    }
+   
 }
