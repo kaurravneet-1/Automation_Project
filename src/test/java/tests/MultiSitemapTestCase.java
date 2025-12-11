@@ -17,7 +17,7 @@ public class MultiSitemapTestCase {
 
     private ExtentReports extent;
 
-    private static final int MAX_PAGES = 10;  // You may change this limit
+    private static final int MAX_PAGES = 5;  // You may change this limit
 
     @BeforeSuite
     public void beforeSuite() {
@@ -319,3 +319,4 @@ public class MultiSitemapTestCase {
         extent.flush();
     }
 }
+
