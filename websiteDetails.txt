@@ -1,0 +1,2 @@
+# Website, Username, Password, SitemapURL, CompanyName, LogoXPath, PhoneNumbers, Addresses, Hours
+https://abmtestserver.com/bzderm/,abmclient,D!k{HnPkSi@Q,https://abmtestserver.com/bzderm/sitemap/,Beer & Zeitler Dermatology,//img[@class='logo'],(646) 452-8111,"110 E. 60th Street Suite 1002, New York, NY 10022","Mon–Fri 9am–5pm"
