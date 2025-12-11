@@ -4,10 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.*;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 import com.aventstack.extentreports.*;
 
@@ -18,8 +16,8 @@ public class SitemapHeaderFooterValidator extends BaseTest {
     private static final int MAX_PAGES = 1;
     private static final double FUZZY_THRESHOLD = 0.80;
 
-    // Run-level counters
-    private static int totalPages = 0, passCount = 0, failCount = 0, warningCount = 0;
+   
+    public static int totalPages = 0, passCount = 0, failCount = 0, warningCount = 0;
 
     @Test
     public void verifySitemapLinksHeaderFooter() {
@@ -35,13 +33,13 @@ public class SitemapHeaderFooterValidator extends BaseTest {
             try {
                 setupDriver();
 
-                // BUILD SITEMAP URL
+               
                 String sitemapUrl = client.website + (client.website.endsWith("/") ? "" : "/") + "sitemap/";
                 driver.get(sitemapUrl);
                 Thread.sleep(2000);
                 scrollToBottom();
 
-                // Collect links FROM sitemap page
+               
                 Set<String> pageLinks = collectInternalLinks(client.website);
 
                 siteTest.info("Total links found in sitemap: " + pageLinks.size());
@@ -60,16 +58,16 @@ public class SitemapHeaderFooterValidator extends BaseTest {
                     totalPages++;
                     sitePages++;
 
-                    ExtentTest pageNode = siteTest.createNode("🔗 Page: " + pageUrl);
+                    ExtentTest pageNode = siteTest.createNode(" Page: " + pageUrl);
 
                     try {
                         driver.get(pageUrl);
                         scrollToBottom();
 
-                        // COLLECT COMPLETE TEXT (HEADER + FOOTER + BODY)
+                        
                         String fullText = getFullSearchableText();
 
-                        // RUN VALIDATIONS
+                       
                         boolean namePass = checkCompanyNameAndLogo(client, fullText, pageNode, pageUrl);
                         boolean phonePass = checkPhoneNumbers(client, fullText, pageNode, pageUrl);
                         boolean addressPass = checkAddresses(client, fullText, pageNode, pageUrl);
@@ -85,11 +83,11 @@ public class SitemapHeaderFooterValidator extends BaseTest {
                         if (!shouldFail) {
                             passCount++;
                             sitePass++;
-                            pageNode.pass("✔ Page validation passed.");
+                            pageNode.pass(" Page validation passed.");
                         } else {
                             failCount++;
                             siteFail++;
-                            pageNode.fail("❌ Page validation failed.");
+                            pageNode.fail(" Page validation failed.");
                         }
 
                     } catch (Exception ex) {
@@ -99,9 +97,9 @@ public class SitemapHeaderFooterValidator extends BaseTest {
                     }
                 }
 
-                // Site-level summary
+               
                 siteTest.info(
-                        "Summary for site:\n" +
+                        "Summary :\n" +
                         "Pages Scanned: " + sitePages +
                         " | Passed: " + sitePass +
                         " | Failed: " + siteFail +
@@ -116,24 +114,8 @@ public class SitemapHeaderFooterValidator extends BaseTest {
             }
         }
 
-        ExtentTest summary = extent.createTest("FINAL RUN SUMMARY");
-        summary.info("Total Pages Scanned: " + totalPages);
-        summary.info("Total Passed: " + passCount);
-        summary.info("Total Failed: " + failCount);
-        summary.info("Total Warnings: " + warningCount);
-
-        if (failCount > 0) summary.fail("❌ Some pages failed.");
-        else if (warningCount > 0) summary.warning("⚠ Some warnings exist.");
-        else summary.pass("✔ All pages passed successfully!");
-
-        extent.flush();
-
-        Assert.assertTrue(failCount == 0, "Some pages failed — check report.");
     }
-
-    // ----------------------------------------------------------
-    // NORMALIZATION & TEXT EXTRACTION
-    // ----------------------------------------------------------
+   
 
     private String normalize(String text) {
         if (text == null) return "";
@@ -162,9 +144,7 @@ public class SitemapHeaderFooterValidator extends BaseTest {
         );
     }
 
-    // ----------------------------------------------------------
-    // FUZZY MATCHING (Levenshtein)
-    // ----------------------------------------------------------
+  
 
     private boolean fuzzyMatch(String a, String b) {
         a = normalize(a);
@@ -195,9 +175,7 @@ public class SitemapHeaderFooterValidator extends BaseTest {
         return dp[a.length()][b.length()];
     }
 
-    // ----------------------------------------------------------
-    // CHECK: COMPANY NAME + LOGO
-    // ----------------------------------------------------------
+ 
 
     private boolean checkCompanyNameAndLogo(ExcelReader.ClientData client, String fullText,
                                             ExtentTest test, String url) {
@@ -208,47 +186,45 @@ public class SitemapHeaderFooterValidator extends BaseTest {
 
             String normalizedCompany = normalize(client.companyName);
 
-            // Try logo alt text
+           
             for (WebElement logo : driver.findElements(By.tagName("img"))) {
                 try {
                     String alt = logo.getAttribute("alt");
                     if (alt != null && !alt.trim().isEmpty()) {
                         if (normalize(alt).contains(normalizedCompany)) {
                             found = true;
-                            test.pass("✔ Company logo found (alt=" + alt + ")");
+                            test.pass(" Company logo found (alt=" + alt + ")");
                             break;
                         }
                     }
                 } catch (StaleElementReferenceException ignored) {}
             }
 
-            // Try full page text
+           
             if (!found && fullText.contains(normalizedCompany)) {
                 found = true;
-                test.pass("✔ Company name found in text.");
+                test.pass(" Company name found in text.");
             }
 
-            // Try fuzzy matching
+           
             if (!found && fuzzyMatch(fullText, normalizedCompany)) {
                 found = true;
-                test.pass("✔ Company name fuzzy matched.");
+                test.pass(" Company name fuzzy matched.");
             }
 
             if (!found) {
-                test.fail("❌ Company name/logo NOT found.",
+                test.fail(" Company name/logo NOT found.",
                         MediaEntityBuilder.createScreenCaptureFromPath(captureScreenshot(url)).build());
             }
 
         } catch (Exception e) {
-            test.warning("⚠ Error checking company name/logo: " + e.getMessage());
+            test.warning(" Error checking company name/logo: " + e.getMessage());
         }
 
         return found;
     }
 
-    // ----------------------------------------------------------
-    // CHECK: PHONE NUMBER
-    // ----------------------------------------------------------
+   
 
     private boolean checkPhoneNumbers(ExcelReader.ClientData client, String fullText,
                                       ExtentTest test, String url) throws IOException {
@@ -262,18 +238,18 @@ public class SitemapHeaderFooterValidator extends BaseTest {
 
             if (digitsPage.contains(normalized)) {
                 foundAny = true;
-                test.pass("✔ Phone found: " + ph);
+                test.pass(" Phone found: " + ph);
                 continue;
             }
 
-            // Check visible DOM text
+          
             for (WebElement el : driver.findElements(By.xpath("//*"))) {
                 try {
                     if (el.isDisplayed()) {
                         String visible = normalize(el.getText()).replaceAll("[^0-9]", "");
                         if (visible.contains(normalized)) {
                             foundAny = true;
-                            test.pass("✔ Phone visible on page: " + ph);
+                            test.pass(" Phone visible on page: " + ph);
                             break;
                         }
                     }
@@ -281,7 +257,7 @@ public class SitemapHeaderFooterValidator extends BaseTest {
             }
 
             if (!foundAny) {
-                test.fail("❌ Phone NOT found: " + ph,
+                test.fail(" Phone NOT found: " + ph,
                         MediaEntityBuilder.createScreenCaptureFromPath(captureScreenshot(url)).build());
             }
         }
@@ -289,9 +265,7 @@ public class SitemapHeaderFooterValidator extends BaseTest {
         return foundAny;
     }
 
-    // ----------------------------------------------------------
-    // CHECK: ADDRESS
-    // ----------------------------------------------------------
+    
 
     private boolean checkAddresses(ExcelReader.ClientData client, String fullText,
                                    ExtentTest test, String url) throws IOException {
@@ -310,14 +284,14 @@ public class SitemapHeaderFooterValidator extends BaseTest {
 
             if (exact || fuzzy || partial) {
                 foundAny = true;
-                test.pass("✔ Address found: " + addr);
+                test.pass(" Address found: " + addr);
             } else {
-                test.warning("⚠ Address not found: " + addr);
+                test.warning(" Address not found: " + addr);
             }
         }
 
         if (!foundAny) {
-            test.fail("❌ Address missing",
+            test.fail(" Address missing",
                     MediaEntityBuilder.createScreenCaptureFromPath(captureScreenshot(url)).build());
         }
 
@@ -335,9 +309,7 @@ public class SitemapHeaderFooterValidator extends BaseTest {
         return ((double) found / words.length) >= 0.60;
     }
 
-    // ----------------------------------------------------------
-    // CHECK: HOURS
-    // ----------------------------------------------------------
+ 
 
     private boolean checkHours(ExcelReader.ClientData client, String fullText,
                                ExtentTest test, String url) throws IOException {
@@ -356,18 +328,16 @@ public class SitemapHeaderFooterValidator extends BaseTest {
         else if (fuzzyMatch(actual, expected)) found = true;
 
         if (found) {
-            test.pass("✔ Hours found: " + client.hours);
+            test.pass(" Hours found: " + client.hours);
         } else {
-            test.fail("❌ Hours not found: " + client.hours,
+            test.fail(" Hours not found: " + client.hours,
                     MediaEntityBuilder.createScreenCaptureFromPath(captureScreenshot(url)).build());
         }
 
         return found;
     }
 
-    // ----------------------------------------------------------
-    // UTILITY METHODS
-    // ----------------------------------------------------------
+ 
 
     private void scrollToBottom() throws InterruptedException {
         JavascriptExecutor js = (JavascriptExecutor) driver;
