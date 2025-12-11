@@ -1,9 +1,9 @@
-name: Run Single Selenium Test (MultiSitemapTestCase)
+name: Run Single Selenium Test
 
 on:
-  workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   run-single-test:
@@ -28,11 +28,31 @@ jobs:
       - name: Run MultiSitemapTestCase
         run: mvn -Dtest=MultiSitemapTestCase test
 
-      - name: Upload Test Reports
+   
+      - name: Upload Extent Report
         uses: actions/upload-artifact@v4
         with:
-          name: selenium-test-report
+          name: extent-report
           path: |
             test-output/
+            **/test-output/
+            extent-report/
+            **/extent-report/
+
+   
+      - name: Upload Screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: |
             screenshots/
+            **/screenshots/
+
+      
+      - name: Upload Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs
+          path: |
             logs/
+            **/logs/
