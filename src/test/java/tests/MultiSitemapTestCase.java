@@ -2,26 +2,28 @@ package tests;
 
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.testng.annotations.*;
 import utils.ExtentReportManager;
 import utils.SitemapParser;
 import utils.LinkValidator;
 
 import java.io.*;
+
 import java.util.*;
 
 public class MultiSitemapTestCase {
 
     private ExtentReports extent;
 
-    private static final int MAX_PAGES = 10;  
+    private static final int MAX_PAGES = 10;  // You may change this limit
 
     @BeforeSuite
     public void beforeSuite() {
         extent = ExtentReportManager.getReportInstance();
     }
 
-  
     private boolean isHeadBlockedCDN(String url) {
         return url.contains("fonts.gstatic.com")
                 || url.contains("fonts.googleapis.com")
@@ -30,7 +32,6 @@ public class MultiSitemapTestCase {
                 || url.contains("gstatic.com");
     }
 
-  
     private String detectFailureReason(String url) {
 
         if (url.contains("xmlrpc.php"))
@@ -48,7 +49,6 @@ public class MultiSitemapTestCase {
         return "Temporary network delay, CDN warm-up, or firewall rate-limit.";
     }
 
-
     @Test
     public void validateSitemapsFromFile() {
 
@@ -61,7 +61,38 @@ public class MultiSitemapTestCase {
             ExtentTest test = extent.createTest("Sitemap: " + sitemap);
             test.info("Reading sitemap: " + sitemap);
 
-            List<String> urls = SitemapParser.extractUrls(sitemap);
+            List<String> urls = null;
+
+            // FIRST: try the standard parser (may perform GET internally)
+            try {
+                urls = SitemapParser.extractUrls(sitemap);
+            } catch (Exception e) {
+                test.warning("Parser threw exception: " + e.getMessage());
+                urls = Collections.emptyList();
+            }
+
+            // If parser returned nothing, try a robust GET + HTML link fallback using Jsoup
+            if (urls == null || urls.isEmpty()) {
+                test.info("Primary sitemap parsing returned no URLs — attempting fallback fetch using GET and HTML parsing.");
+
+                String content = fetchUrlContentUsingJsoup(sitemap, test);
+
+                if (content != null && !content.isEmpty()) {
+                    // Try to extract URLs from HTML using Jsoup
+                    List<String> htmlUrls = extractLinksFromHtml(sitemap, content);
+                    if (!htmlUrls.isEmpty()) {
+                        urls = htmlUrls;
+                        test.pass("Fallback: extracted " + urls.size() + " links from HTML sitemap/page.");
+                    } else {
+                        test.warning("Fallback fetch succeeded but no links were found in the page content.");
+                        urls = Collections.emptyList();
+                    }
+                } else {
+                    test.warning("Unable to fetch sitemap content with GET (possible timeout or blocked). Skipping this sitemap.");
+                    urls = Collections.emptyList();
+                }
+            }
+
             test.info("URLs found: " + urls.size());
 
             test.info("SUMMARY_PLACEHOLDER");
@@ -75,7 +106,6 @@ public class MultiSitemapTestCase {
             List<String> recovered = new ArrayList<>();
             List<String> recoveredReasons = new ArrayList<>();
 
-            
             int count = 0;
 
             for (String url : urls) {
@@ -88,7 +118,6 @@ public class MultiSitemapTestCase {
                 int status;
                 String msg;
 
-                
                 if (isHeadBlockedCDN(url)) {
                     status = retryGet(url);
                     if (status != -1) {
@@ -124,8 +153,6 @@ public class MultiSitemapTestCase {
                 }
             }
 
-
-         
             List<String> stillBroken = new ArrayList<>();
 
             for (String link : brokenFirst) {
@@ -139,8 +166,6 @@ public class MultiSitemapTestCase {
                 }
             }
 
-
-          
             StringBuilder sb = new StringBuilder();
 
             sb.append("<b>Summary →</b> Checked: ").append(count)
@@ -148,7 +173,6 @@ public class MultiSitemapTestCase {
               .append(" | Broken (After Recheck): ").append(stillBroken.size())
               .append("<br><br>");
 
-           
             sb.append("<details><summary><b>All Links (")
               .append(allLinks.size()).append(")</b></summary><br>");
 
@@ -158,7 +182,6 @@ public class MultiSitemapTestCase {
                 index++;
             }
             sb.append("</details><br><br>");
-
 
             sb.append("<details><summary><b>Broken on First Check (")
               .append(brokenFirst.size()).append(")</b></summary><br>");
@@ -175,7 +198,6 @@ public class MultiSitemapTestCase {
             }
             sb.append("</details><br><br>");
 
-
             sb.append("<details><summary><b>Broken After Recheck (")
               .append(stillBroken.size()).append(")</b></summary><br>");
 
@@ -189,8 +211,6 @@ public class MultiSitemapTestCase {
             }
             sb.append("</details><br><br>");
 
-
-            
             sb.append("<details><summary><b>Recovered After Recheck (")
               .append(recovered.size()).append(")</b></summary><br>");
 
@@ -206,20 +226,10 @@ public class MultiSitemapTestCase {
             }
             sb.append("</details>");
 
-
-           
-            List<com.aventstack.extentreports.model.Log> logs =
-                    test.getModel().getLogContext().getAll();
-
-            for (com.aventstack.extentreports.model.Log log : logs) {
-                if ("SUMMARY_PLACEHOLDER".equals(log.getDetails())) {
-                    log.setDetails("<div style='margin-left:10px; font-size:14px;'>" + sb + "</div>");
-                    break;
-                }
-            }
+            // Insert the summary into the report using info() — safer than trying to access internal logs
+            test.info("<div style='margin-left:10px; font-size:14px;'>" + sb + "</div>");
 
 
-        
             long endTime = System.currentTimeMillis();
             test.getModel().setStartTime(new Date(startTime));
             test.getModel().setEndTime(new Date(endTime));
@@ -228,11 +238,46 @@ public class MultiSitemapTestCase {
         }
     }
 
+    // ------------------------------------------------------------------
+    // Robust GET fetch using Jsoup (helps when HEAD is blocked or server
+    // requires browser-like headers). Returns page body or null.
+    // ------------------------------------------------------------------
+    private String fetchUrlContentUsingJsoup(String url, ExtentTest test) {
+        try {
+            test.info("Attempting GET fetch with Jsoup for: " + url);
+            Document doc = Jsoup.connect(url)
+                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+                    .timeout(10000)
+                    .ignoreHttpErrors(true)
+                    .followRedirects(true)
+                    .get();
+            return doc.html();
+        } catch (Exception e) {
+            test.warning("Jsoup fetch failed: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Extract absolute links from HTML content. Uses sitemap URL as base.
+    // ------------------------------------------------------------------
+    private List<String> extractLinksFromHtml(String sitemapUrl, String html) {
+        List<String> out = new ArrayList<>();
+        try {
+            Document doc = Jsoup.parse(html, sitemapUrl);
+            doc.select("a[href]").forEach(a -> {
+                String href = a.absUrl("href").trim();
+                if (!href.isEmpty()) out.add(href);
+            });
+        } catch (Exception ignored) {}
+        return out;
+    }
 
     private int retryGet(String url) {
         for (int i = 0; i < 2; i++) {
             int code = tryGet(url);
             if (code != -1) return code;
+            try { Thread.sleep(500); } catch (InterruptedException ignored) {}
         }
         return -1;
     }
@@ -246,6 +291,8 @@ public class MultiSitemapTestCase {
             conn.setRequestMethod("GET");
             conn.setConnectTimeout(7000);
             conn.setReadTimeout(7000);
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+            conn.setInstanceFollowRedirects(true);
             conn.connect();
 
             return conn.getResponseCode();
@@ -254,7 +301,6 @@ public class MultiSitemapTestCase {
             return -1;
         }
     }
-
 
     private List<String> readSitemapList(String path) {
         List<String> list = new ArrayList<>();
@@ -273,4 +319,3 @@ public class MultiSitemapTestCase {
         extent.flush();
     }
 }
-
