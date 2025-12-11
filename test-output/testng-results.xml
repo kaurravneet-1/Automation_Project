@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results ignored="0" total="1" passed="1" failed="0" skipped="0">
+  <reporter-output>
+  </reporter-output>
+  <suite started-at="2025-12-03T01:29:52 IST" name="Suite" finished-at="2025-12-03T01:37:25 IST" duration-ms="452970">
+    <groups>
+    </groups>
+    <test started-at="2025-12-03T01:29:52 IST" name="Multi Sitemap Tests" finished-at="2025-12-03T01:37:25 IST" duration-ms="452970">
+      <class name="tests.SiteMapFullPageValidatorTest">
+        <test-method is-config="true" signature="setupDriverBeforeSuite()[pri:0, instance:tests.SiteMapFullPageValidatorTest@59402b8f]" started-at="2025-12-03T01:29:50 IST" name="setupDriverBeforeSuite" finished-at="2025-12-03T01:29:52 IST" duration-ms="2038" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setupDriverBeforeSuite -->
+        <test-method is-config="true" signature="setupReport()[pri:0, instance:tests.SiteMapFullPageValidatorTest@59402b8f]" started-at="2025-12-03T01:29:52 IST" name="setupReport" finished-at="2025-12-03T01:29:52 IST" duration-ms="132" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setupReport -->
+        <test-method signature="runSitemapFullValidation()[pri:0, instance:tests.SiteMapFullPageValidatorTest@59402b8f]" started-at="2025-12-03T01:29:52 IST" name="runSitemapFullValidation" finished-at="2025-12-03T01:37:25 IST" duration-ms="452910" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- runSitemapFullValidation -->
+        <test-method is-config="true" signature="tearDown()[pri:0, instance:tests.SiteMapFullPageValidatorTest@59402b8f]" started-at="2025-12-03T01:37:25 IST" name="tearDown" finished-at="2025-12-03T01:37:25 IST" duration-ms="40" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- tearDown -->
+      </class> <!-- tests.SiteMapFullPageValidatorTest -->
+    </test> <!-- Multi Sitemap Tests -->
+  </suite> <!-- Suite -->
+</testng-results>
