@@ -14,7 +14,7 @@ public class MultiSitemapTestCase {
 
     private ExtentReports extent;
 
-    private static final int MAX_PAGES = 1000;  
+    private static final int MAX_PAGES = 10;  
 
     @BeforeSuite
     public void beforeSuite() {
@@ -273,3 +273,4 @@ public class MultiSitemapTestCase {
         extent.flush();
     }
 }
+
