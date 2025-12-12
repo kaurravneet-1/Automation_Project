@@ -29,33 +29,32 @@ public class SiteMapFullPageValidatorTest extends BaseTest {
             String password = site[2].trim();
             String sitemapUrl = site[3].trim();
 
-            ExtentTest siteTest = extent.createTest("🌐 Website Validation → " + sitemapUrl);
+            ExtentTest siteTest = extent.createTest(" Website Validation → " + sitemapUrl);
 
             try {
                 setupDriver();
 
-                // LOGIN USING BASIC AUTH
+               
                 String authUrl = baseUrl.replace("https://",
                         "https://" + username + ":" + password + "@");
 
                 driver.get(authUrl);
                 Thread.sleep(1200);
-                siteTest.pass("✔ Logged in successfully");
+                siteTest.pass(" Logged in successfully");
 
-                // LOAD SITEMAP
+              
                 driver.get(sitemapUrl);
                 Thread.sleep(1500);
 
                 List<String> urls = extractSitemapLinks(baseUrl);
-                siteTest.pass("✔ HTML Sitemap detected → URLs = " + urls.size());
+                siteTest.pass(" HTML Sitemap detected → URLs = " + urls.size());
                 siteTest.info("Total URLs Found → " + urls.size());
 
                 urls = urls.subList(0, Math.min(MAX_PAGES, urls.size()));
 
-                // VALIDATE EACH PAGE
                 for (String pageUrl : urls) {
 
-                    ExtentTest pageNode = siteTest.createNode("📄 Page: " + pageUrl);
+                    ExtentTest pageNode = siteTest.createNode(" Page: " + pageUrl);
 
                     try {
                         driver.get(pageUrl);
@@ -66,17 +65,17 @@ public class SiteMapFullPageValidatorTest extends BaseTest {
 
                       
 
-                        pageNode.pass("✔ Page Validation Completed");
+                        pageNode.pass(" Page Validation Completed");
 
                     } catch (Exception e) {
-                        pageNode.warning("⚠ Page Validation Issue → " + e.getMessage());
+                        pageNode.warning(" Page Validation Issue → " + e.getMessage());
                     }
                 }
 
                 driver.quit();
 
             } catch (Exception e) {
-                siteTest.warning("⚠ Site executed with warnings → " + e.getMessage());
+                siteTest.warning(" Site executed with warnings → " + e.getMessage());
                 try { driver.quit(); } catch (Exception ignore) {}
             }
         }
@@ -84,7 +83,7 @@ public class SiteMapFullPageValidatorTest extends BaseTest {
         extent.flush();
     }
 
-    // Extract sitemap links
+   
     private List<String> extractSitemapLinks(String baseUrl) {
         List<String> urls = new ArrayList<>();
 
@@ -105,13 +104,12 @@ public class SiteMapFullPageValidatorTest extends BaseTest {
         return urls;
     }
 
-    // CTA Object
     class CTAItem {
         String name, href, color, font, weight, padding, radius;
         boolean icon;
     }
 
-    // CTA VALIDATION ENGINE 
+   
     private void validateCTAs(ExtentTest pageNode) {
 
         List<CTAItem> items = new ArrayList<>();
@@ -128,7 +126,7 @@ public class SiteMapFullPageValidatorTest extends BaseTest {
                 c.href = el.getAttribute("href");
                 c.name = extractCTAName(el, c.href);
 
-                // Remove unwanted CTAs
+                
                 if (c.name.equalsIgnoreCase("Accessibility Menu") ||
                     c.name.equalsIgnoreCase("Translations Menu"))
                     continue;
@@ -149,35 +147,34 @@ public class SiteMapFullPageValidatorTest extends BaseTest {
 
             ExtentTest cNode = pageNode.createNode("CTA: " + c.name);
 
-            // UI DETAILS
+        
             cNode.info("UI → Color=" + c.color + ", Font=" + c.font +
                     ", Weight=" + c.weight + ", Padding=" + c.padding +
                     ", Radius=" + c.radius + ", Icon=" + c.icon);
 
             if (c.href == null || c.href.isEmpty()) {
-                cNode.warning("⚠ Not clickable (href missing)");
+                cNode.warning(" Not clickable (href missing)");
                 continue;
             }
 
-            // NAVIGATION ATTEMPT
+           
             cNode.info("ℹ Navigation Attempt → " + c.href);
 
             try {
                 driver.navigate().to(c.href);
                 Thread.sleep(700);
 
-                cNode.pass("✔ CTA Working");
+                cNode.pass(" CTA Working");
 
                 driver.navigate().back();
                 Thread.sleep(400);
 
             } catch (Exception ex) {
-                cNode.warning("⚠ CTA Navigation Issue → " + ex.getMessage());
+                cNode.warning(" CTA Navigation Issue → " + ex.getMessage());
             }
         }
     }
 
-    // CTA name extraction
     private String extractCTAName(WebElement el, String href) {
 
         String text = safeText(el);
@@ -228,3 +225,4 @@ public class SiteMapFullPageValidatorTest extends BaseTest {
         Thread.sleep(500);
     }
 }
+
