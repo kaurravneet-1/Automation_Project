@@ -13,8 +13,8 @@
 <!--   <class name="tests.LoginFullSiteHeaderFooterValidator"/>  -->
 <!--   <class name="tests.LoginBasedSitemapHeaderFooterValidator"/>-->
   
-  <class name="tests.SiteMapFullPageValidatorTest"/>
-   <!--    <class name="tests.LoginFullSiteCTAValidator"/> -->
+  <!--   <class name="tests.SiteMapFullPageValidatorTest"/>-->
+    <class name="tests.LoginFullSiteCTAValidator"/> 
 
  <!--  <class name="tests.SiteMapFullSiteCTAValidator"/>-->
  
@@ -23,6 +23,7 @@
     </classes>
   </test>
 </suite> <!-- Suite -->
+
 
 
 
