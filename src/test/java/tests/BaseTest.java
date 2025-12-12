@@ -6,22 +6,21 @@ import com.aventstack.extentreports.ExtentTest;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
-
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.*;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
 
 public class BaseTest {
 
-    public static WebDriver driver;
+    public WebDriver driver;     // ❗ Instance-level (not static!)
     public static ExtentReports extent;
 
+  
     @BeforeSuite
     public void setupReport() {
         try {
@@ -30,9 +29,9 @@ public class BaseTest {
             new File(reportDir).mkdirs();
             String reportPath = reportDir + "/Report_" + timestamp + ".html";
 
-            ExtentSparkReporter spark = new ExtentSparkReporter(new File(reportPath));
-            spark.config().setDocumentTitle("Sitemap + Header/Footer Validation");
-            spark.config().setReportName("Sitemap Header/Footer Report");
+            ExtentSparkReporter spark = new ExtentSparkReporter(reportPath);
+            spark.config().setDocumentTitle("Automation Report");
+            spark.config().setReportName("Full Website Validation Report");
 
             extent = new ExtentReports();
             extent.attachReporter(spark);
@@ -44,31 +43,24 @@ public class BaseTest {
         }
     }
 
-    // ⭐⭐⭐ HYBRID CHROME SETUP — FAST + COMPATIBLE ⭐⭐⭐
+   
+    @BeforeMethod
     public void setupDriver() {
 
         try {
-            WebDriverManager.chromedriver().browserVersion("142").setup();
+            WebDriverManager.chromedriver().setup();
 
             ChromeOptions options = new ChromeOptions();
-
             options.addArguments("--disable-gpu");
             options.addArguments("--disable-dev-shm-usage");
             options.addArguments("--no-sandbox");
             options.addArguments("--disable-extensions");
-            options.addArguments("--disable-popup-blocking");
             options.addArguments("--disable-notifications");
-            options.addArguments("--start-maximized");
-
-            System.setProperty("webdriver.http.factory", "jdk-http-client");
-            options.addArguments("--remote-allow-origins=*");
-            options.addArguments("--disable-features=IsolateOrigins,site-per-process");
-
-            options.addArguments("--disable-blink-features=AutomationControlled");
-
-            // Headless mode
-            options.addArguments("--headless=new");
             options.addArguments("--window-size=1920,1080");
+            options.addArguments("--remote-allow-origins=*");
+
+          
+            options.addArguments("--headless=new");
 
             driver = new ChromeDriver(options);
 
@@ -77,41 +69,31 @@ public class BaseTest {
         }
     }
 
-    // ================================================================
-    @BeforeSuite
-    public void setupDriverBeforeSuite() {
-        if (driver == null) setupDriver();
-    }
-
-    public static WebDriver getDriver() {
+    public WebDriver getDriver() {
         return driver;
     }
-    // ================================================================
 
-    @AfterSuite
+ 
     public void tearDown() {
         try {
-            if (driver != null) driver.quit();
-            if (extent != null) extent.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            if (driver != null) {
+                driver.quit();
+            }
+        } catch (Exception ignored) {}
     }
 
-    // ------------------------------------------------------------------
-    // ⭐ ADDED: Generic helper for creating tests (safe, no interference)
-    // ------------------------------------------------------------------
-    public ExtentTest createTest(String testName) {
-        return extent.createTest(testName);
+   
+    @AfterSuite
+    public void closeReport() {
+        try {
+            if (extent != null) {
+                extent.flush();
+            }
+        } catch (Exception ignored) {}
     }
 
-    // ------------------------------------------------------------------
-    // ⭐ ADDED: Helper to log formatted summary (optional)
-    // ------------------------------------------------------------------
-    public void logSummary(ExtentTest test, int working, int broken, int skipped) {
-        test.info("<b>Summary →</b> " +
-                "<span style='color:green;'>Working: " + working + "</span> | " +
-                "<span style='color:red;'>Broken: " + broken + "</span> | " +
-                "<span style='color:gray;'>Skipped: " + skipped + "</span>");
+  
+    public ExtentTest createTest(String name) {
+        return extent.createTest(name);
     }
 }
