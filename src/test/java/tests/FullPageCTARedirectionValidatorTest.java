@@ -19,7 +19,6 @@ public class FullPageCTARedirectionValidatorTest extends BaseTest {
 
         ExtentTest mainTest = extent.createTest("Full Website CTA Validator");
 
-        
         setupDriver();
 
         try {
@@ -58,7 +57,6 @@ public class FullPageCTARedirectionValidatorTest extends BaseTest {
                     Thread.sleep(1500);
                     scrollToBottom();
 
-                    // collect CTAs
                     List<WebElement> allCTAs = driver.findElements(By.xpath("//a | //button | //*[@onclick]"));
 
                     int totalCTAs = allCTAs.size();
@@ -98,13 +96,38 @@ public class FullPageCTARedirectionValidatorTest extends BaseTest {
         } catch (Exception e) {
             mainTest.fail("Unexpected Error: " + e.getMessage());
         } finally {
-          
             try { driver.quit(); } catch (Exception ignored) {}
         }
     }
 
 
-   
+    // ------------------------------------------------------------------------------------
+    // ⭐ FIXED: Search CTA correctly detected (Not treated as generic interactive CTA)
+    // ------------------------------------------------------------------------------------
+    private boolean isSearchCTA(WebElement el) {
+
+        try {
+            String id = el.getAttribute("id");
+            String cls = el.getAttribute("class");
+            String placeholder = el.getAttribute("placeholder");
+            String aria = el.getAttribute("aria-label");
+            String text = el.getText().trim().toLowerCase();
+
+            if ((id != null && id.toLowerCase().contains("search")) ||
+                (cls != null && cls.toLowerCase().contains("search")) ||
+                (placeholder != null && placeholder.toLowerCase().contains("search")) ||
+                (aria != null && aria.toLowerCase().contains("search")) ||
+                text.contains("search")) {
+
+                return true;
+            }
+
+        } catch (Exception ignored) {}
+
+        return false;
+    }
+
+
     private int validateAllCTAs(ExtentTest pageNode, String currentPageUrl) {
 
         int failed = 0;
@@ -114,7 +137,6 @@ public class FullPageCTARedirectionValidatorTest extends BaseTest {
 
         for (int i = 0; i < total; i++) {
 
-            // refresh list to avoid StaleElementReference
             List<WebElement> fresh = driver.findElements(By.xpath("//a | //button | //*[@onclick]"));
             if (i >= fresh.size()) break;
 
@@ -127,18 +149,38 @@ public class FullPageCTARedirectionValidatorTest extends BaseTest {
 
             ExtentTest cNode = pageNode.createNode("CTA #" + (i + 1) + ": " + label);
 
-            // UI info (non-blocking)
             try {
                 cNode.info("UI Color = " + el.getCssValue("color"));
             } catch (Exception ignored) {}
 
             cNode.info("Target URL → " + href);
 
-            try {
 
+            // ------------------------------------------------------------------------------------
+            // ⭐ SEARCH CTA HANDLING — FIXED
+            // ------------------------------------------------------------------------------------
+            if (isSearchCTA(el)) {
+
+                try {
+                    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", el);
+                    Thread.sleep(500);
+
+                    cNode.pass("Search CTA Working (Detected as Search Input/Button)");
+                } catch (Exception ex) {
+                    cNode.fail("Search CTA Failed → " + ex.getMessage());
+                    failed++;
+                }
+
+                try { driver.navigate().to(currentPageUrl); } catch (Exception ignored) {}
+
+                continue;
+            }
+
+
+
+            try {
                 String original = driver.getCurrentUrl();
 
-                
                 if (href != null && href.startsWith("tel:")) {
                     cNode.pass("Phone CTA Working: " + href);
                     continue;
@@ -169,14 +211,12 @@ public class FullPageCTARedirectionValidatorTest extends BaseTest {
                     continue;
                 }
 
-              
                 if (href.startsWith("javascript")) {
                     cNode.fail("Invalid CTA: javascript link");
                     failed++;
                     continue;
                 }
 
-               
                 driver.navigate().to(href);
                 Thread.sleep(700);
 
@@ -196,14 +236,14 @@ public class FullPageCTARedirectionValidatorTest extends BaseTest {
                 cNode.fail("CTA Error: " + ex.getMessage());
                 failed++;
 
-                try {
-                    driver.navigate().to(currentPageUrl);
-                } catch (Exception ignored) {}
+                try { driver.navigate().to(currentPageUrl); } catch (Exception ignored) {}
             }
         }
 
         return failed;
     }
+
+
 
     private String extractLabel(WebElement el) {
 
@@ -222,6 +262,7 @@ public class FullPageCTARedirectionValidatorTest extends BaseTest {
         return el.getTagName() + " element";
     }
 
+
     public List<String> readUrlsFromCSV(String path) throws Exception {
         List<String> list = new ArrayList<>();
         BufferedReader br = new BufferedReader(new FileReader(path));
@@ -233,6 +274,7 @@ public class FullPageCTARedirectionValidatorTest extends BaseTest {
         return list;
     }
 
+
     private void scrollToBottom() throws InterruptedException {
         JavascriptExecutor js = (JavascriptExecutor) driver;
         long height = (long) js.executeScript("return document.body.scrollHeight");
@@ -241,6 +283,7 @@ public class FullPageCTARedirectionValidatorTest extends BaseTest {
             Thread.sleep(80);
         }
     }
+
 
     private String captureScreenshot() {
         try {
