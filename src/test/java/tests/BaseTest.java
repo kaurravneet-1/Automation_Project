@@ -73,7 +73,7 @@ public class BaseTest {
         return driver;
     }
 
- 
+    @AfterMethod
     public void tearDown() {
         try {
             if (driver != null) {
@@ -97,3 +97,4 @@ public class BaseTest {
         return extent.createTest(name);
     }
 }
+
