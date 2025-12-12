@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Suite">
+   <test name="Multi Sitemap Tests">
+    <classes>
+   
+  <!--  <class name="tests.MultiSitemapTestCase"/>  -->
+<!--  <class name="tests.MultiSitemapLoginTest"/> -->
+ <!--  <class name="tests.HeaderFooterChecker"/>-->
+  <class name="tests.SitemapHeaderFooterValidator"/> 
+   
+  
+ 
+<!--    <class name="tests.LoginFullSiteHeaderFooterValidator"/>  -->
+ <!--    <class name="tests.LoginBasedSitemapHeaderFooterValidator"/> -->   
+  
+ <!-- <class name="tests.SiteMapFullPageValidatorTest"/>-->
+   <!--    <class name="tests.LoginFullSiteCTAValidator"/> -->
+  
+  <!--  <class name="tests.SiteMapFullSiteCTAValidator"/>-->
+ 
+ <!-- <class name="tests.WebsiteCTAChecker"/> -->
+ 
+ <!--<class name="tests.FullSiteCrawlerTest"/>  -->
+<!-- <class name="tests.CTARedirectionValidatorTest"/>  -->
+  <!--<class name="tests.FullPageCTARedirectionValidatorTest"/>-->
+ <!-- <class name="tests.HeaderFooterCTAValidatorTest"/>  -->
+<!--<class name="tests.FullSiteMasterValidatorTest"/>-->
+<!-- <class name="tests.BrokenLinkScannerTest"/>--> 	
+
+    </classes>
+  </test>
+</suite> <!-- Suite -->
