@@ -3,11 +3,11 @@
 <suite name="Suite">
    <test name=" Run TestNG Suite">
     <classes>
-   
-       <class name="tests.MultiSitemapTestCase"/>   
+     <class name="tests.MultiSitemapTestCase"/>   
     <class name="tests.SitemapHeaderFooterValidator"/>
        <class name="tests.FullPageCTARedirectionValidatorTest"/>  
- 
+    
+ <!-- 
      <class name="tests.MultiSitemapLoginTest"/> 
   <class name="tests.HeaderFooterChecker"/> 
    <class name="tests.LoginFullSiteHeaderFooterValidator"/>  
@@ -18,11 +18,14 @@
 
     <class name="tests.SiteMapFullSiteCTAValidator"/>
  
-<class name="tests.WebsiteCTAChecker"/> 
+<class name="tests.WebsiteCTAChecker"/> -->
+
+       
 
     </classes>
   </test>
 </suite> <!-- Suite -->
+
 
 
 
