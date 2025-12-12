@@ -17,10 +17,10 @@ import java.util.Date;
 
 public class BaseTest {
 
-    public WebDriver driver;     // ❗ Instance-level (not static!)
-    public static ExtentReports extent;
+    protected WebDriver driver;      
+    protected static ExtentReports extent;
 
-  
+   
     @BeforeSuite
     public void setupReport() {
         try {
@@ -30,11 +30,12 @@ public class BaseTest {
             String reportPath = reportDir + "/Report_" + timestamp + ".html";
 
             ExtentSparkReporter spark = new ExtentSparkReporter(reportPath);
-            spark.config().setDocumentTitle("Automation Report");
             spark.config().setReportName("Full Website Validation Report");
+            spark.config().setDocumentTitle("Automation Report");
 
             extent = new ExtentReports();
             extent.attachReporter(spark);
+
             extent.setSystemInfo("Tester", "Ravneet Kaur");
             extent.setSystemInfo("Environment", "Staging");
 
@@ -43,10 +44,9 @@ public class BaseTest {
         }
     }
 
-   
+    
     @BeforeMethod
     public void setupDriver() {
-
         try {
             WebDriverManager.chromedriver().setup();
 
@@ -59,7 +59,7 @@ public class BaseTest {
             options.addArguments("--window-size=1920,1080");
             options.addArguments("--remote-allow-origins=*");
 
-          
+            // Required for GitHub CI
             options.addArguments("--headless=new");
 
             driver = new ChromeDriver(options);
@@ -73,6 +73,7 @@ public class BaseTest {
         return driver;
     }
 
+   
     @AfterMethod
     public void tearDown() {
         try {
@@ -88,13 +89,3 @@ public class BaseTest {
         try {
             if (extent != null) {
                 extent.flush();
-            }
-        } catch (Exception ignored) {}
-    }
-
-  
-    public ExtentTest createTest(String name) {
-        return extent.createTest(name);
-    }
-}
-
