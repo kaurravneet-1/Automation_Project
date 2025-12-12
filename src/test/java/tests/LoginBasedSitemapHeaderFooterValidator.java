@@ -20,8 +20,8 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
     @Test
     public void runLoginSitemapValidation() {
 
-        // ⭐ Use existing BaseTest report → no new file created
-        ExtentTest mainTest = extent.createTest("🔐 Login-Based Sitemap Validator");
+        
+        ExtentTest mainTest = extent.createTest(" Login-Based Sitemap Validator");
 
         String configPath = "src/test/resources/website02.txt";
         List<String[]> sites = SiteConfigReader.readConfig(configPath);
@@ -30,7 +30,6 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
 
             String websiteUrl = site.length > 0 ? site[0].trim() : "";
 
-            // Skip invalid rows silently
             if (websiteUrl == null || !websiteUrl.startsWith("http")) {
                 continue;
             }
@@ -46,15 +45,14 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
 
             String authUrl = buildBasicAuthUrl(websiteUrl, username, password);
 
-            // Create a fresh test node for each website
+         
             ExtentTest test = mainTest.createNode("Validate Sitemap (Login Required): " + websiteUrl);
             test.info("Opening website using Basic Auth: " + authUrl);
 
             try {
-                // new driver for each site to avoid cross-site session problems
+           
                 setupDriver();
 
-                // safeGet will retry navigation if there are timeouts / session issues
                 boolean ok = safeGet(authUrl, test);
                 if (!ok) {
                     test.fail("Unable to load site after retries: " + websiteUrl);
@@ -64,9 +62,8 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
                 }
 
                 Thread.sleep(1200);
-                test.pass("✔ Logged in successfully using Basic Auth (or page loaded).");
+                test.pass(" Logged in successfully using Basic Auth (or page loaded).");
 
-                // Load sitemap
                 test.info("Opening sitemap: " + sitemapUrl);
                 ok = safeGet(sitemapUrl, test);
                 if (!ok) {
@@ -74,13 +71,12 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
                     warningCount++;
                 }
 
-                // Collect URLs
                 Set<String> pageLinks = collectSitemapLinks(websiteUrl);
 
                 test.info("Total URLs found: " + pageLinks.size());
 
                 if (pageLinks.isEmpty()) {
-                    test.warning("⚠ No sitemap URLs found — using homepage.");
+                    test.warning(" No sitemap URLs found — using homepage.");
                     warningCount++;
                     pageLinks.add(websiteUrl);
                 }
@@ -95,13 +91,13 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
                     totalPages++;
                     sitePages++;
 
-                    ExtentTest pageNode = test.createNode("🌍 Page: " + pageUrl);
+                    ExtentTest pageNode = test.createNode(" Page: " + pageUrl);
 
                     try {
                         boolean loaded = safeGet(pageUrl, pageNode);
                         if (!loaded) {
                             siteFail++; failCount++;
-                            pageNode.fail("❌ Page load failed after retries → " + pageUrl);
+                            pageNode.fail(" Page load failed after retries → " + pageUrl);
                             continue;
                         }
 
@@ -112,18 +108,17 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
                         String footerText = normalize(getSectionText("//footer"));
                         String bodyText   = normalize(driver.getPageSource());
 
-                        // Validations
                         checkCompanyName(companyName, fullText, pageNode, pageUrl);
                         checkPhonesExactInHeaderFooterBody(phones, headerText, footerText, bodyText, pageNode, pageUrl);
                         checkAddresses(addresses, fullText, pageNode, pageUrl);
                         checkHours(hours, fullText, pageNode, pageUrl);
 
                         sitePass++; passCount++;
-                        pageNode.pass("✔ Page validation completed.");
+                        pageNode.pass(" Page validation completed.");
 
                     } catch (Exception ex) {
                         siteFail++; failCount++;
-                        pageNode.fail("❌ Error processing page → " + ex.getMessage());
+                        pageNode.fail(" Error processing page → " + ex.getMessage());
                     }
                 }
 
@@ -137,19 +132,16 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
 
             } catch (Exception e) {
                 failCount++;
-                test.fail("🔥 Critical error → " + e.getMessage());
+                test.fail(" Critical error → " + e.getMessage());
                 try { driver.quit(); } catch (Exception ignored) {}
             }
         }
 
-        // flush handled by caller / BaseTest tearDown; but safe to flush here too
         extent.flush();
     }
 
 
-    // -------------------------------------------------------------------
-    // SITEMAP LINK COLLECTION
-    // -------------------------------------------------------------------
+   
     private Set<String> collectSitemapLinks(String baseUrl) {
         Set<String> links = new LinkedHashSet<>();
         try {
@@ -173,9 +165,7 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
         catch (Exception e) { return url; }
     }
 
-    // -------------------------------------------------------------------
-    // TEXT EXTRACTION
-    // -------------------------------------------------------------------
+   
     private String getFullSearchableText() {
         return normalize(
                 getSectionText("//header") + " " +
@@ -205,9 +195,7 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
     }
 
 
-    // -------------------------------------------------------------------
-    // VALIDATION METHODS (UNCHANGED)
-    // -------------------------------------------------------------------
+    
     private boolean fuzzyMatch(String a, String b) {
         a = normalize(a); b = normalize(b);
         int d = levenshtein(a, b);
@@ -242,12 +230,12 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
         boolean found = false;
 
         if (full.contains(nm)) {
-            test.pass("✔ Company name found");
+            test.pass(" Company name found");
             found = true;
         }
 
         if (fuzzyMatch(full, nm)) {
-            test.pass("✔ Fuzzy name match");
+            test.pass(" Fuzzy name match");
             found = true;
         }
 
@@ -279,9 +267,9 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
             boolean inFooter = footerText.replaceAll("[^0-9]", "").contains(digits);
             boolean inBody = bodyText.replaceAll("[^0-9]", "").contains(digits);
 
-            if (inHeader) test.pass("✔ Phone in header: " + original);
-            if (inFooter) test.pass("✔ Phone in footer: " + original);
-            if (inBody)   test.pass("✔ Phone in body: " + original);
+            if (inHeader) test.pass(" Phone in header: " + original);
+            if (inFooter) test.pass(" Phone in footer: " + original);
+            if (inBody)   test.pass(" Phone in body: " + original);
 
             if (!inHeader && !inFooter && !inBody)
                 test.info("ℹ Phone missing: " + original);
@@ -304,7 +292,7 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
             String n = normalize(addr);
 
             if (page.contains(n) || fuzzyMatch(page, n)) {
-                test.pass("✔ Address found: " + addr);
+                test.pass(" Address found: " + addr);
                 found = true;
             } else {
                 test.info("ℹ Address missing: " + addr);
@@ -326,7 +314,7 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
         if (actual.contains(expected) ||
            fuzzyMatch(actual, expected)) {
 
-            test.pass("✔ Hours found: " + hrs);
+            test.pass(" Hours found: " + hrs);
         } else {
             test.info("ℹ Hours missing: " + hrs);
         }
@@ -335,9 +323,7 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
     }
 
 
-    // -------------------------------------------------------------------
-    // SCROLL
-    // -------------------------------------------------------------------
+   
     private void scrollToBottom() throws InterruptedException {
         JavascriptExecutor js = (JavascriptExecutor) driver;
         long last = (long) js.executeScript("return document.body.scrollHeight");
@@ -351,30 +337,19 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
         }
     }
 
-    // -------------------------------------------------------------------
-    // Helpers: safe navigation + basic auth builder
-    // -------------------------------------------------------------------
-
-    /**
-     * Try to load URL with retries. If a timeout or WebDriver session issue occurs,
-     * it will recreate the driver and retry once more.
-     *
-     * @param url  URL to load
-     * @param node ExtentTest node for logging (may be main test or page node)
-     * @return true if loaded (no exception thrown), false if failed after retries
-     */
+  
     private boolean safeGet(String url, ExtentTest node) {
         int attempts = 0;
         while (attempts < 2) {
             attempts++;
             try {
                 driver.get(url);
-                // small wait for initial load; heavier interactions will use scrollToBottom()
+              
                 try { Thread.sleep(1200); } catch (InterruptedException ignored) {}
                 return true;
             } catch (TimeoutException te) {
                 node.warning("Page load slow → retrying (" + attempts + "): " + shortError(te));
-                // restart driver and retry (only once)
+               
                 try {
                     driver.quit();
                 } catch (Exception ignored) {}
@@ -398,7 +373,7 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
                 return false;
             }
         }
-        // exhausted retries
+      
         return false;
     }
 
@@ -414,12 +389,11 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
         if (password == null) password = "";
 
         try {
-            // encode username/password to avoid special char problems in URL
+          
             String u = URLEncoder.encode(username, StandardCharsets.UTF_8.toString());
             String p = URLEncoder.encode(password, StandardCharsets.UTF_8.toString());
 
-            // restore ':' and '@' safety for URL style: encode will convert them; some servers accept percent-encoded credentials
-            // but many servers require raw user:pass@host. Since password may contain '@' or ':', using encoded form is safer.
+            
             if (baseUrl.startsWith("https://")) {
                 return "https://" + u + ":" + p + "@" + baseUrl.substring(8);
             } else if (baseUrl.startsWith("http://")) {
@@ -428,7 +402,7 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
                 return baseUrl;
             }
         } catch (Exception e) {
-            // fallback to naive string concat (less safe)
+           
             if (baseUrl.startsWith("https://")) {
                 return "https://" + username + ":" + password + "@" + baseUrl.substring(8);
             } else if (baseUrl.startsWith("http://")) {
@@ -440,4 +414,5 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
     }
 
 }
+
 
