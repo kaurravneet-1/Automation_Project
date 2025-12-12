@@ -4,11 +4,11 @@
    <test name=" Run TestNG Suite">
     <classes>
    
-        <class name="tests.MultiSitemapTestCase"/>   
-        <class name="tests.SitemapHeaderFooterValidator"/> 
-       <class name="tests.FullPageCTARedirectionValidatorTest"/>  
+      <!--   <class name="tests.MultiSitemapTestCase"/>   -->
+      <!--   <class name="tests.SitemapHeaderFooterValidator"/> -->
+      <!--  <class name="tests.FullPageCTARedirectionValidatorTest"/>  -->
  
-       <!--<class name="tests.MultiSitemapLoginTest"/> -->
+      <class name="tests.MultiSitemapLoginTest"/> 
  <!-- <class name="tests.HeaderFooterChecker"/> -->
 <!--    <class name="tests.LoginFullSiteHeaderFooterValidator"/>  -->
   <!--  <class name="tests.LoginBasedSitemapHeaderFooterValidator"/>-->
@@ -23,6 +23,7 @@
     </classes>
   </test>
 </suite> <!-- Suite -->
+
 
 
 
