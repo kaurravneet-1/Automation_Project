@@ -16,7 +16,7 @@ public class ExtentReportManager extends BaseTest {
     public static ExtentReports getReportInstance() {
         if (extent == null) {
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            String reportPath = System.getProperty("user.dir") + "/reports/Report_" + timestamp + ".html";
+            String reportPath = System.getProperty("user.dir") + "/report/Report_" + timestamp + ".html";
 
             ExtentSparkReporter spark = new ExtentSparkReporter(reportPath);
             spark.config().setDocumentTitle("Sitemap Link Validation Report");
@@ -46,3 +46,4 @@ public class ExtentReportManager extends BaseTest {
     //     return null;
     // }
 }
+
