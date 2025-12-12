@@ -71,7 +71,7 @@ public class LoginFullSiteCTAValidator extends BaseTest {
                         pageNode.pass("Page Validation Completed.");
 
                     } catch (Exception e) {
-                        pageNode.warning("⚠ Page processing issue → " + e.getMessage());
+                        pageNode.warning(" Page processing issue → " + e.getMessage());
                         pageNode.info("Screenshot: " + captureScreenshot(current));
                     }
                 }
@@ -80,7 +80,7 @@ public class LoginFullSiteCTAValidator extends BaseTest {
                 driver.quit();
 
             } catch (Exception e) {
-                siteTest.warning("⚠ Site executed with warnings → " + e.getMessage());
+                siteTest.warning(" Site executed with warnings → " + e.getMessage());
                 try { driver.quit(); } catch (Exception ignored) {}
             }
         }
@@ -88,15 +88,13 @@ public class LoginFullSiteCTAValidator extends BaseTest {
         extent.flush();
     }
 
-    // CTA Object
+   
     class CTAItem {
         String name, href, color, font, weight, padding, radius;
         boolean icon;
     }
 
-    // ------------------------------------------------------------
-    // CTA VALIDATION ENGINE (NO FAILURES)
-    // ------------------------------------------------------------
+  
     private void validateCTAsOnPage(
             ExtentTest pageNode,
             String username,
@@ -117,7 +115,7 @@ public class LoginFullSiteCTAValidator extends BaseTest {
                 c.href = el.getAttribute("href");
                 c.name = extractCTAName(el, c.href);
 
-                // Remove unwanted CTAs
+               
                 if (c.name.equalsIgnoreCase("Accessibility Menu") ||
                     c.name.equalsIgnoreCase("Translations Menu")) {
                     continue;
@@ -147,7 +145,7 @@ public class LoginFullSiteCTAValidator extends BaseTest {
                     ", Icon=" + c.icon);
 
             if (c.href == null || c.href.isEmpty()) {
-                cNode.warning("⚠ Not clickable (href missing)");
+                cNode.warning(" Not clickable (href missing)");
                 continue;
             }
 
@@ -159,27 +157,23 @@ public class LoginFullSiteCTAValidator extends BaseTest {
                         "https://" + username + ":" + password + "@");
             }
 
-            // REMOVE HTTP STATUS CHECK ✔
             cNode.info("ℹ Navigation Attempt → " + fixedHref);
 
             try {
                 driver.navigate().to(fixedHref);
                 Thread.sleep(500);
-                cNode.pass("✔ CTA Working");
+                cNode.pass(" CTA Working");
 
                 driver.navigate().back();
                 Thread.sleep(300);
 
             } catch (Exception ex) {
-                cNode.warning("⚠ CTA Navigation Issue → " + ex.getMessage());
+                cNode.warning(" CTA Navigation Issue → " + ex.getMessage());
             }
         }
     }
 
-    
-    // ------------------------------------------------------------
-    // SUPPORT UTILS
-    // ------------------------------------------------------------
+   
 
     private String extractCTAName(WebElement el, String href) {
 
@@ -247,7 +241,7 @@ public class LoginFullSiteCTAValidator extends BaseTest {
     private String captureScreenshot(String url) {
         try {
             File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            String dir = "reports/screenshots";
+            String dir = "report/screenshots";
             new File(dir).mkdirs();
             String path = dir + "/" + System.currentTimeMillis() + ".png";
             FileHandler.copy(src, new File(path));
@@ -273,3 +267,4 @@ public class LoginFullSiteCTAValidator extends BaseTest {
     }
 
 }
+
