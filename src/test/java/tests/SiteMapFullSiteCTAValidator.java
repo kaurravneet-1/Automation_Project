@@ -24,28 +24,23 @@ public class SiteMapFullSiteCTAValidator extends BaseTest {
 
         for (String[] site : sites) {
 
-            // CSV contains only sitemap URL
+            
             String sitemapUrl = site[0].trim();
 
-            // automatically extract base domain
             String baseUrl = "https://" + URI.create(sitemapUrl).getHost();
 
-            ExtentTest siteTest = extent.createTest("🌐 Website Validation → " + sitemapUrl);
+            ExtentTest siteTest = extent.createTest(" Website Validation → " + sitemapUrl);
 
             try {
 
-                // driver setup already handled by BaseTest
                 driver.get(sitemapUrl);
                 Thread.sleep(1500);
 
-                // Extract URLs
                 List<String> urls = extractSitemapLinks(baseUrl);
                 siteTest.info("Total URLs found in sitemap: " + urls.size());
 
-                // Limit pages processed
                 urls = urls.subList(0, Math.min(MAX_PAGES, urls.size()));
 
-                // Validate each sitemap URL
                 for (String pageUrl : urls) {
 
                     ExtentTest pageNode = siteTest.createNode("📄 Page: " + pageUrl);
@@ -59,32 +54,29 @@ public class SiteMapFullSiteCTAValidator extends BaseTest {
                         validateCTAs(pageNode);
                    
 
-                        pageNode.pass("✔ Page Validation Completed");
+                        pageNode.pass(" Page Validation Completed");
 
                     } catch (Exception e) {
-                        pageNode.warning("⚠ Page Validation Issue → " + e.getMessage());
+                        pageNode.warning(" Page Validation Issue → " + e.getMessage());
                         pageNode.info("Screenshot: " + captureScreenshot(pageUrl));
                     }
                 }
 
             } catch (Exception e) {
-                siteTest.warning("⚠ Site execution warning → " + e.getMessage());
+                siteTest.warning(" Site execution warning → " + e.getMessage());
             }
         }
 
         extent.flush();
     }
 
-    // ---------------------------------------------------------------------------
-    // UNIVERSAL SITEMAP PARSER (XML + HTML)
-    // ---------------------------------------------------------------------------
-
+    
     private List<String> extractSitemapLinks(String baseUrl) {
 
         List<String> urls = new ArrayList<>();
         String domain = URI.create(baseUrl).getHost();
 
-        // Detect XML <loc> tags
+       
         List<WebElement> locTags = driver.findElements(By.tagName("loc"));
         if (!locTags.isEmpty()) {
             for (WebElement e : locTags) {
@@ -94,7 +86,6 @@ public class SiteMapFullSiteCTAValidator extends BaseTest {
             return urls;
         }
 
-        // HTML sitemap case
         List<WebElement> anchors = driver.findElements(By.xpath("//a[@href]"));
         for (WebElement a : anchors) {
             String href = a.getAttribute("href");
@@ -106,9 +97,7 @@ public class SiteMapFullSiteCTAValidator extends BaseTest {
         return urls;
     }
 
-    // ---------------------------------------------------------------------------
-    // CTA VALIDATION (ALL CTAs)
-    // ---------------------------------------------------------------------------
+   
 
     class CTAItem {
         String name, href, color, font, weight, padding, radius;
@@ -160,20 +149,20 @@ public class SiteMapFullSiteCTAValidator extends BaseTest {
                     ", Icon=" + c.icon);
 
             if (c.href == null || c.href.isEmpty()) {
-                cNode.warning("⚠ Not clickable");
+                cNode.warning(" Not clickable");
                 continue;
             }
 
             try {
                 driver.navigate().to(c.href);
                 Thread.sleep(700);
-                cNode.pass("✔ CTA Working");
+                cNode.pass(" CTA Working");
 
                 driver.navigate().back();
                 Thread.sleep(350);
 
             } catch (Exception ex) {
-                cNode.warning("⚠ CTA Navigation Issue → " + ex.getMessage());
+                cNode.warning(" CTA Navigation Issue → " + ex.getMessage());
             }
         }
     }
@@ -212,14 +201,11 @@ public class SiteMapFullSiteCTAValidator extends BaseTest {
         }
     }
 
-    // ---------------------------------------------------------------------------
-    // UTILITIES
-    // ---------------------------------------------------------------------------
 
     private String captureScreenshot(String url) {
         try {
             File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            String dir = "reports/screenshots";
+            String dir = "report/screenshots";
             new File(dir).mkdirs();
             String path = dir + "/" + System.currentTimeMillis() + ".png";
             FileHandler.copy(src, new File(path));
@@ -238,3 +224,4 @@ public class SiteMapFullSiteCTAValidator extends BaseTest {
 
     
 }
+
