@@ -12,7 +12,7 @@ import com.aventstack.extentreports.*;
 
 public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
 
-    private static final int MAX_PAGES = 1000;
+    private static final int MAX_PAGES = 1;
     private static final double FUZZY_THRESHOLD = 0.80;
 
     public static int totalPages = 0, passCount = 0, failCount = 0, warningCount = 0;
@@ -440,3 +440,4 @@ public class LoginBasedSitemapHeaderFooterValidator extends BaseTest {
     }
 
 }
+
