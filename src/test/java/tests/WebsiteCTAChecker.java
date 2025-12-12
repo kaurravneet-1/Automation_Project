@@ -16,12 +16,12 @@ import com.aventstack.extentreports.*;
 
 public class WebsiteCTAChecker extends BaseTest {
 
-    private static final int MAX_PAGES = 1;   // ⭐ LIMIT PAGES INSIDE WEBSITE
+    private static final int MAX_PAGES = 1;   
 
     @Test
     public void runFullSiteValidation() {
 
-        String configPath = "src/test/resources/websites.csv";   // ONLY website URLs
+        String configPath = "src/test/resources/websites.csv";  
         List<String[]> sites = SiteConfigReader.readConfig(configPath);
 
    
@@ -29,7 +29,7 @@ public class WebsiteCTAChecker extends BaseTest {
 
             String websiteUrl = site[0].trim();
 
-            ExtentTest siteTest = extent.createTest("🌐 Website: " + websiteUrl);
+            ExtentTest siteTest = extent.createTest(" Website: " + websiteUrl);
 
             String domain = getDomain(websiteUrl);
 
@@ -37,9 +37,9 @@ public class WebsiteCTAChecker extends BaseTest {
                 driver.get(websiteUrl);
                 Thread.sleep(1200);
 
-                siteTest.pass("✔ Homepage Loaded");
+                siteTest.pass(" Homepage Loaded");
 
-                // ⭐ PAGE CRAWLING SETUP
+              
                 Set<String> toVisit = new LinkedHashSet<>();
                 Set<String> visited = new HashSet<>();
 
@@ -57,7 +57,7 @@ public class WebsiteCTAChecker extends BaseTest {
 
                     scanned++;
 
-                    ExtentTest pageNode = siteTest.createNode("📄 Page: " + current);
+                    ExtentTest pageNode = siteTest.createNode(" Page: " + current);
 
                     try {
                         driver.get(current);
@@ -71,10 +71,10 @@ public class WebsiteCTAChecker extends BaseTest {
 
                   
 
-                        pageNode.pass("✔ Page Validation Completed");
+                        pageNode.pass(" Page Validation Completed");
 
                     } catch (Exception e) {
-                        pageNode.warning("⚠ Error processing page → " + e.getMessage());
+                        pageNode.warning(" Error processing page → " + e.getMessage());
                         pageNode.info("Screenshot: " + captureScreenshot(current));
                     }
                 }
@@ -82,16 +82,14 @@ public class WebsiteCTAChecker extends BaseTest {
                 siteTest.info("Total pages scanned: " + scanned);
 
             } catch (Exception e) {
-                siteTest.warning("⚠ Website executed with warnings → " + e.getMessage());
+                siteTest.warning(" Website executed with warnings → " + e.getMessage());
             }
         }
 
         extent.flush();
     }
 
-    // --------------------------------------------------------------------
-    // Collect internal page links for crawling
-    // --------------------------------------------------------------------
+   
     private void collectInternalLinks(String current, String baseUrl, String domain, Set<String> toVisit) {
         try {
             for (WebElement a : driver.findElements(By.tagName("a"))) {
@@ -110,9 +108,7 @@ public class WebsiteCTAChecker extends BaseTest {
         } catch (Exception ignored) {}
     }
 
-    // --------------------------------------------------------------------
-    // CTA VALIDATION
-    // --------------------------------------------------------------------
+  
     class CTAItem {
         String name, href, color, font, weight, padding, radius;
         boolean icon;
@@ -163,7 +159,7 @@ public class WebsiteCTAChecker extends BaseTest {
                     ", Icon=" + c.icon);
 
             if (c.href == null || c.href.isEmpty()) {
-                cNode.warning("⚠ Not clickable (href missing)");
+                cNode.warning(" Not clickable (href missing)");
                 continue;
             }
 
@@ -171,21 +167,19 @@ public class WebsiteCTAChecker extends BaseTest {
                 driver.navigate().to(c.href);
                 Thread.sleep(600);
 
-                cNode.pass("✔ CTA Working");
+                cNode.pass(" CTA Working");
 
                 driver.navigate().back();
                 Thread.sleep(300);
 
             } catch (Exception ex) {
-                cNode.warning("⚠ CTA Navigation Issue → " + ex.getMessage());
+                cNode.warning(" CTA Navigation Issue → " + ex.getMessage());
             }
         }
     }
 
    
-    // --------------------------------------------------------------------
-    // UTILITY METHODS
-    // --------------------------------------------------------------------
+    
     private String extractCTAName(WebElement el, String href) {
 
         try { if (!el.getText().trim().isEmpty()) return el.getText().trim(); }
@@ -231,7 +225,7 @@ public class WebsiteCTAChecker extends BaseTest {
     private String captureScreenshot(String url) {
         try {
             File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            String dir = "reports/screenshots";
+            String dir = "report/screenshots";
             new File(dir).mkdirs();
             String path = dir + "/" + System.currentTimeMillis() + ".png";
             FileHandler.copy(src, new File(path));
@@ -245,3 +239,4 @@ public class WebsiteCTAChecker extends BaseTest {
     }
 
 }
+
