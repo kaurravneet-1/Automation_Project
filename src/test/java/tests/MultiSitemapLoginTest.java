@@ -46,9 +46,7 @@ public class MultiSitemapLoginTest extends BaseTest {
             String authUrl = websiteUrl.replace("https://",
                     "https://" + username + ":" + password + "@");
 
-            // -----------------------------
-            // Create report block
-            // -----------------------------
+         
             test = extent.createTest("Validate Sitemap (Login Required): " + websiteUrl);
 
             test.log(Status.INFO, "Opening website using Basic Auth: " + authUrl);
@@ -60,7 +58,7 @@ public class MultiSitemapLoginTest extends BaseTest {
             test.log(Status.PASS, "Logged in successfully (Basic Auth).");
             logPass("Logged in successfully (Basic Auth).");
 
-            // Open sitemap
+      
             test.log(Status.INFO, "Opening sitemap: " + sitemapUrl);
             logInfo("Opening sitemap: " + sitemapUrl);
 
@@ -73,12 +71,10 @@ public class MultiSitemapLoginTest extends BaseTest {
             test.log(Status.INFO, "Found " + totalUrls + " URLs in sitemap.");
             logInfo("Found " + totalUrls + " URLs in sitemap.");
 
-            // Validate each URL
             for (String url : allUrls) {
                 validateUrl(url);
             }
 
-            // -----------------------------
             int working = loadedCount + redirectCount;
             int broken = failedCount;
 
@@ -96,9 +92,6 @@ public class MultiSitemapLoginTest extends BaseTest {
         }
     }
 
-    // --------------------------------------------------------------
-    // COLLECT ALL LINKS FROM HTML SITEMAP
-    // --------------------------------------------------------------
     public List<String> collectSitemapUrls() {
 
         List<WebElement> links = driver.findElements(By.xpath("//a[@href]"));
@@ -114,9 +107,6 @@ public class MultiSitemapLoginTest extends BaseTest {
         return urls;
     }
 
-    // --------------------------------------------------------------
-    // VALIDATE EACH URL + REDIRECT HANDLING + SCREENSHOTS
-    // --------------------------------------------------------------
     public void validateUrl(String url) {
         try {
             driver.navigate().to(url);
@@ -124,11 +114,9 @@ public class MultiSitemapLoginTest extends BaseTest {
 
             String current = driver.getCurrentUrl();
 
-            // Normalize (remove trailing slash)
             String cleanOriginal = url.replaceAll("/$", "");
             String cleanCurrent = current.replaceAll("/$", "");
 
-            // CASE 1 → Loaded exactly or with only trailing slash difference
             if (cleanOriginal.equalsIgnoreCase(cleanCurrent)) {
 
                 loadedCount++;
@@ -139,7 +127,6 @@ public class MultiSitemapLoginTest extends BaseTest {
                 return;
             }
 
-            // CASE 2 → Redirected but still valid page (no 404)
             if (driver.getTitle() != null &&
                 !driver.getTitle().contains("404") &&
                 !driver.getPageSource().toLowerCase().contains("not found")) {
@@ -152,7 +139,7 @@ public class MultiSitemapLoginTest extends BaseTest {
                 return;
             }
 
-            // CASE 3 → Failed (error page)
+          
             failedCount++;
             String message = url + " → Failed To Load";
 
@@ -169,9 +156,7 @@ public class MultiSitemapLoginTest extends BaseTest {
         }
     }
 
-    // --------------------------------------------------------------
-    // EXTENT REPORT SCREENSHOT FUNCTION
-    // --------------------------------------------------------------
+    
     public String attachScreenshot() {
         try {
             File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
@@ -187,9 +172,7 @@ public class MultiSitemapLoginTest extends BaseTest {
         }
     }
 
-    // --------------------------------------------------------------
-    // LOGGING (Console Only)
-    // --------------------------------------------------------------
+ 
     public void logInfo(String msg) {
         System.out.println(getTimestamp() + "  INFO  " + msg);
     }
@@ -202,11 +185,9 @@ public class MultiSitemapLoginTest extends BaseTest {
         System.out.println(getTimestamp() + "  FAIL  " + msg);
     }
 
-    // --------------------------------------------------------------
-    // TIMESTAMP
-    // --------------------------------------------------------------
     public String getTimestamp() {
         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss a");
         return sdf.format(new Date());
     }
 }
+
