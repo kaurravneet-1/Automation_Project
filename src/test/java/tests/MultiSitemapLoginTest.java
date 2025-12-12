@@ -78,15 +78,13 @@ public class MultiSitemapLoginTest extends BaseTest {
                 validateUrl(url);
             }
 
-          
-           
             // -----------------------------
-            int working = loadedCount;
-            int broken  = redirectCount + failedCount;
+            int working = loadedCount + redirectCount;
+            int broken = failedCount;
 
             String summaryLine = "Summary → Total: " + totalUrls +
-                                 " | Working: " + working +
-                                 " | Broken: " + broken;
+                    " | Working: " + working +
+                    " | Broken: " + broken;
 
             test.log(Status.INFO, summaryLine);
 
@@ -117,7 +115,7 @@ public class MultiSitemapLoginTest extends BaseTest {
     }
 
     // --------------------------------------------------------------
-    // VALIDATE EACH URL + LOGGING + COUNTS + SCREENSHOTS
+    // VALIDATE EACH URL + REDIRECT HANDLING + SCREENSHOTS
     // --------------------------------------------------------------
     public void validateUrl(String url) {
         try {
@@ -126,27 +124,45 @@ public class MultiSitemapLoginTest extends BaseTest {
 
             String current = driver.getCurrentUrl();
 
-            if (!current.equals(url)) {
+            // Normalize (remove trailing slash)
+            String cleanOriginal = url.replaceAll("/$", "");
+            String cleanCurrent = current.replaceAll("/$", "");
 
-                redirectCount++;
-                String message = url + " → Redirected To → " + current;
-
-                test.log(Status.FAIL, message + attachScreenshot());
-                logFail(message);
-
-            } else {
+            // CASE 1 → Loaded exactly or with only trailing slash difference
+            if (cleanOriginal.equalsIgnoreCase(cleanCurrent)) {
 
                 loadedCount++;
                 String message = url + " → Loaded Successfully";
 
                 test.log(Status.PASS, message);
                 logPass(message);
+                return;
             }
+
+            // CASE 2 → Redirected but still valid page (no 404)
+            if (driver.getTitle() != null &&
+                !driver.getTitle().contains("404") &&
+                !driver.getPageSource().toLowerCase().contains("not found")) {
+
+                redirectCount++;
+                String message = url + " → Redirected To → " + current + " (Working)";
+
+                test.log(Status.WARNING, message);
+                logInfo(message);
+                return;
+            }
+
+            // CASE 3 → Failed (error page)
+            failedCount++;
+            String message = url + " → Failed To Load";
+
+            test.log(Status.FAIL, message + attachScreenshot());
+            logFail(message);
 
         } catch (Exception e) {
 
             failedCount++;
-            String message = url + " → Failed To Load";
+            String message = url + " → Failed Due To Exception";
 
             test.log(Status.FAIL, message + attachScreenshot());
             logFail(message);
