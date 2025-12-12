@@ -7,24 +7,10 @@
     <class name="tests.SitemapHeaderFooterValidator"/>
        <class name="tests.FullPageCTARedirectionValidatorTest"/>  
     
- <!-- 
-     <class name="tests.MultiSitemapLoginTest"/> 
-  <class name="tests.HeaderFooterChecker"/> 
-   <class name="tests.LoginFullSiteHeaderFooterValidator"/>  
-   <class name="tests.LoginBasedSitemapHeaderFooterValidator"/> 
-  
-     <class name="tests.SiteMapFullPageValidatorTest"/>
-     <class name="tests.LoginFullSiteCTAValidator"/> 
-
-    <class name="tests.SiteMapFullSiteCTAValidator"/>
- 
-<class name="tests.WebsiteCTAChecker"/> -->
-
-       
-
     </classes>
   </test>
 </suite> <!-- Suite -->
+
 
 
 
