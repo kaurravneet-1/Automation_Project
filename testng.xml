@@ -14,15 +14,16 @@
 <!--   <class name="tests.LoginBasedSitemapHeaderFooterValidator"/>-->
   
   <!--   <class name="tests.SiteMapFullPageValidatorTest"/>-->
-    <class name="tests.LoginFullSiteCTAValidator"/> 
+    <!-- <class name="tests.LoginFullSiteCTAValidator"/> -->
 
- <!--  <class name="tests.SiteMapFullSiteCTAValidator"/>-->
+  <class name="tests.SiteMapFullSiteCTAValidator"/>
  
  <!--  <class name="tests.WebsiteCTAChecker"/> -->
 
     </classes>
   </test>
 </suite> <!-- Suite -->
+
 
 
 
