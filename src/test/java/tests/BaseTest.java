@@ -20,7 +20,6 @@ public class BaseTest {
     protected WebDriver driver;      
     protected static ExtentReports extent;
 
-   
     @BeforeSuite
     public void setupReport() {
         try {
@@ -44,7 +43,7 @@ public class BaseTest {
         }
     }
 
-    
+  
     @BeforeMethod
     public void setupDriver() {
         try {
@@ -59,7 +58,7 @@ public class BaseTest {
             options.addArguments("--window-size=1920,1080");
             options.addArguments("--remote-allow-origins=*");
 
-            // Required for GitHub CI
+           
             options.addArguments("--headless=new");
 
             driver = new ChromeDriver(options);
@@ -73,7 +72,7 @@ public class BaseTest {
         return driver;
     }
 
-   
+  
     @AfterMethod
     public void tearDown() {
         try {
@@ -89,3 +88,12 @@ public class BaseTest {
         try {
             if (extent != null) {
                 extent.flush();
+            }
+        } catch (Exception ignored) {}
+    }
+
+ 
+    public ExtentTest createTest(String name) {
+        return extent.createTest(name);
+    }
+}
