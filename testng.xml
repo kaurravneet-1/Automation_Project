@@ -6,8 +6,8 @@
    
   <!--  <class name="tests.MultiSitemapTestCase"/>  -->
 <!--  <class name="tests.MultiSitemapLoginTest"/> -->
- <!--  <class name="tests.HeaderFooterChecker"/>-->
-  <class name="tests.SitemapHeaderFooterValidator"/> 
+ <class name="tests.HeaderFooterChecker"/>
+ <!--   <class name="tests.SitemapHeaderFooterValidator"/> -->
    
   
  
@@ -31,3 +31,4 @@
     </classes>
   </test>
 </suite> <!-- Suite -->
+
